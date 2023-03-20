@@ -1,0 +1,62 @@
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const customProps = document.querySelector('#custom-properties');
+        const alpine = document.createElement('script');
+        alpine.src = '//unpkg.com/alpinejs'
+
+        let hasCustom = false;
+        let target = null;
+        let variations = document.querySelectorAll('#product_form .js-product-variants [data-variation-id]').forEach(el => {
+            if (el.querySelector('label') && el.querySelector('label').innerText.indexOf('Personalização') > -1) {
+                el.style.display = 'none';
+                target = el;
+            }
+        })
+
+        if (target) {
+            document.head.appendChild(alpine)
+            target.insertAdjacentHTML('afterend', customProps.innerHTML)
+            document.addEventListener('alpine:init', () => {
+                Alpine.data('customprop', () => ({
+                    custom: false,
+
+                    init() {
+                        this.$watch('custom', () => {
+                            target.querySelector('a:not(.selected)').click();
+                        })
+                    }
+                }))
+            })
+        }
+    })
+</script>
+
+<script id="custom-properties" type="text/html">
+        <div x-data="customprop" class="col-12" >
+            <label class="form-label d-block mb-2">Personalização</label>
+            <p>
+                <a :class="'btn btn-variant' + (!custom ? ' selected' : '')">
+                    <span class="btn-variant-content" x-on:click.prevent="custom = false">Não</span>
+                </a>
+                <a :class="'btn btn-variant' + (custom ? ' selected' : '')">
+                    <span class="btn-variant-content" x-on:click.prevent="custom = true">Sim</span>
+                </a >
+            </p >
+    <template x-if="custom">
+        <div>
+            <p class="form-group">
+                <label>Nome<br>
+                    <input name="properties[NomePersonalizado]" type="text" placeholder="Ex.: João"
+                        class="form-control properties-input" />
+                </label>
+            </p>
+            <p class="form-group">
+                <label>Número<br>
+                    <input name="properties[NumeroPersonalizado]" type="number" placeholder="Ex.: 10"
+                        class="form-control properties-input" />
+                </label>
+            </p>
+        </div>
+    </template>
+        </div >
+    </script>
